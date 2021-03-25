@@ -8,6 +8,7 @@ import Doacoes from './pages/Doacoes';
 import DoacoesDisponiveis from './pages/DoacoesDisponiveis';
 import Solicitacao from './pages/Solicitacao';
 import EdicaoDados from './pages/EdicaoDados';
+import Interesse from './pages/Interesse';
 
 var routes = [
     {
@@ -25,6 +26,11 @@ var routes = [
         path: "/redef_senha/:token",
         name: "RedefSenha",
         component: RedefSenha
+    },
+    {
+        path: "/interesse_doacao/:doacao/:interesse",
+        name: "InteresseDoacao",
+        component: Interesse
     },
     {
         path: "/cadastro_senha/:token",

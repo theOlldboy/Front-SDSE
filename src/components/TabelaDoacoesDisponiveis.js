@@ -1,11 +1,15 @@
 import React, {Component} from 'react';
-import { ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Table, Button, Row, Label, Col } from 'reactstrap';
+import { ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Table, Button, Row, Label, Col, InputGroup, Input, InputGroupAddon } from 'reactstrap';
 import Paginacao from './Paginacao';
 import Mapa from './Mapa';
-class TabelaSolicitacoes extends Component {
+import * as toast from '../utils/toasts'
+import Api from '../services/api'
+
+class TabelaDoacoesDisponiveis extends Component {
   
   state = {
     currentPage : 0,
+    volume: '',
     selected : {volume : '', cbr : '',
       tipo_solo : {tipo: 'Tipo do solo', id : 0}, 
       ra_solo : {ra: 'RA do solo', id : 0}, 
@@ -37,6 +41,24 @@ class TabelaSolicitacoes extends Component {
   }
 
   toggle = () => this.setState({showModal: !this.state.showModal})
+
+  changeVolume = (e) => this.setState({volume : e.target.value})
+
+  interesse = async () => {
+    const { volume } = this.state;
+    const tipoSoloId = this.state.selected.tipo_solo.id;
+    const soloId = this.state.selected.id;
+      if(volume !== '') {
+          await Api.post("solo-interesse/", {volume, tipoSoloId, statusSoloId : 5, soloId}).then(response => {
+              toast.sucesso("Interesse informado com sucesso")
+              this.toggle();
+          }).catch( () => {
+              toast.erro("Erro ao manifestar o interesse")
+          })
+      }else {
+          toast.erro("Informe o volume de solo de interesse")
+      }
+  }
 
   render() {
     return (
@@ -91,9 +113,16 @@ class TabelaSolicitacoes extends Component {
             <ListGroupItem>E-mail: {this.state.selected.empresa_user.email}</ListGroupItem>
             <ListGroupItem>Representante: {this.state.selected.empresa_user.representante}</ListGroupItem>
           </ListGroup>
-            <button  className="button-pdf"  hidden={this.state.selected.file == null}>
-              <a href={this.state.selected.file == null ? null : this.state.selected.file.url} download="laudoSTP">Baixar laudo de caractarização do solo<i class="fa fa-file-pdf-o"></i></a>
-            </button>
+          <button  className="button-pdf"  hidden={this.state.selected.file == null}>
+            <a href={this.state.selected.file == null ? null : this.state.selected.file.url} download="laudoSTP">Baixar laudo de caractarização do solo<i class="fa fa-file-pdf-o"></i></a>
+          </button>
+          <Row className="ml-5 mr-5">
+            <Label>Tem interese?</Label><br/>
+              <InputGroup>
+                  <Input className='rounded-left' placeholder='Volume (m³)' type='number' value={this.state.volume} onChange={this.changeVolume}/>
+                  <InputGroupAddon addonType="append"><Button className='rounded-right' onClick={this.interesse}>Sim!</Button></InputGroupAddon>
+              </InputGroup>
+          </Row>
           <div className='mapa'>
             <Mapa place={this.state.selected}/>
           </div>
@@ -106,4 +135,4 @@ class TabelaSolicitacoes extends Component {
   }
 }
 
-export default TabelaSolicitacoes;
+export default TabelaDoacoesDisponiveis;

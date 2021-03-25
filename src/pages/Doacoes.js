@@ -124,40 +124,46 @@ class Doacao extends Component {
         let { modalAdd } = this.state;
         const tipoSoloId = this.state.new.tipo_solo.id
         const raSoloId = this.state.new.ra_solo.id
-        if(volume !== '') {
-            if (tipoSoloId !== 0) {
-                if (raSoloId !== 0) {
-                    await Api.post("solo/", {volume, cbr, tipoSoloId, raSoloId, latitude, longitude, statusSoloId : 1}).then(response => {
-                        this.setState({new : {
-                            ...this.state.new,
-                            id: response.data.id
-                        }})
-                        this.setState({modalAdd : {
-                            ...this.state.modalAdd,
-                            soloId: response.data.id
-                        }})
-                        this.setState({doacoes : [this.state.new].concat(this.state.doacoes)})
-                        if (this.state.doacoes.length !== 0 && this.state.hidden) {
-                            this.hiddenTabela()
-                        }else if (this.state.doacoes.length === 0 && this.state.hidden === false){
-                            this.hiddenTabela()
-                        }
-                        if (modalAdd.selectedFile !== null){
-                            this.saveFile();
-                        }
-                        toast.sucesso("Doação cadastrada com sucesso")
-                        this.toggle();
-                    }).catch( () => {
-                        toast.erro("Erro ao cadastrar a doação")
-                    })
+        if(!!latitude && !!longitude){
+            if(volume !== '') {
+                if (tipoSoloId !== 0) {
+                    if (raSoloId !== 0) {
+                        await Api.post("solo/", {volume, cbr, tipoSoloId, raSoloId, latitude, longitude, statusSoloId : 1}).then(response => {
+                            this.setState({new : {
+                                ...this.state.new,
+                                id: response.data.id
+                            }})
+                            this.setState({modalAdd : {
+                                ...this.state.modalAdd,
+                                soloId: response.data.id
+                            }})
+                            this.setState({doacoes : [this.state.new].concat(this.state.doacoes)})
+                            if (this.state.doacoes.length !== 0 && this.state.hidden) {
+                                this.hiddenTabela()
+                            }else if (this.state.doacoes.length === 0 && this.state.hidden === false){
+                                this.hiddenTabela()
+                            }
+                            if (modalAdd.selectedFile !== null){
+                                this.saveFile();
+                            }
+                            toast.sucesso("Doação cadastrada com sucesso")
+                            this.toggle();
+                        }).catch( () => {
+                            toast.erro("Erro ao cadastrar a doação")
+                        })
+                    }else {
+                        toast.erro("Informe a RA do solo")
+                    }
                 }else {
-                    toast.erro("Informe a RA do solo")
+                    toast.erro("Informe o tipo do solo")
                 }
             }else {
-                toast.erro("Informe o tipo do solo")
+                toast.erro("Informe o volume de solo da doação")
             }
-        }else {
-            toast.erro("Informe o volume de solo da doação")
+            
+        }else{
+            toast.info("Por favor, permita o acesso a sua localização para poder cadastrar novas doações no SDSE.")
+
         }
     }
 
