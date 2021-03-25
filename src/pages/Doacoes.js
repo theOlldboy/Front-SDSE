@@ -8,12 +8,18 @@ class Doacao extends Component {
 
     state = {
         doacoes : [],
-        new : {id : 0, volume : '', latitude : '', longitude : '', tipo_solo : {tipo: 'Tipo do solo', id : 0}, status_solo : {status : 'DOAÇÃO - DISPONÍVEL', id : 1}},
+        new : {id : 0, volume : '', cbr : '', latitude : '', longitude : '', 
+            tipo_solo : {tipo: 'Tipo do solo', id : 0}, 
+            status_solo : {status : 'DOAÇÃO - DISPONÍVEL', id : 1},
+            ra_solo : {ra : 'Selecione a RA', id : 0}
+        },
         tipos : [],
+        ras : [],
         hidden : false,
         volume : '',
         dropdownOpen : false,
         dropdownOpenNew : false,
+        dropdownOpenRA : false,
         labelTipo : {tipo : 'Tipo de solo', id : 0},
         showModal: false,
         modalAdd : {       
@@ -34,6 +40,11 @@ class Doacao extends Component {
                 tipos : tipos.data.tipoSolos
             })
         })
+        Api.get('solo-ras').then(ras => {
+            this.setState({
+                ras : ras.data.ra
+            })
+        })
     }
 
     hiddenTabela = () => this.setState({hidden : !this.state.hidden})
@@ -41,6 +52,8 @@ class Doacao extends Component {
     toggleTipo = () => this.setState({dropdownOpen : !this.state.dropdownOpen})
 
     toggleTipoNew = () => this.setState({dropdownOpenNew : !this.state.dropdownOpenNew})
+
+    toggleTipoRA = () => this.setState({dropdownOpenRA : !this.state.dropdownOpenRA})
 
     setDoacoes(doacoes) {
         this.setState({doacoes : doacoes})
@@ -57,16 +70,27 @@ class Doacao extends Component {
     
     changeTipoNew = (e) => this.setState({
         new : {...this.state.new,
-          tipo_solo : {
+            tipo_solo : {
               tipo : e.target.textContent,
               id : e.target.value
             }
-          }  
-        })
+        }  
+    })
+    
+    changeTipoRA = (e) => this.setState({
+        new : {...this.state.new,
+            ra_solo : {
+              ra : e.target.textContent,
+              id : e.target.value
+            }
+        }  
+    })
 
     changeVolume = (e) => this.setState({volume : e.target.value})
 
     changeVolumeNew = (e) => this.setState({new: {...this.state.new, volume : e.target.value}})
+
+    changeCbrNew = (e) => this.setState({new: {...this.state.new, cbr : e.target.value}})
 
     changeLatLong = (lat, long) => this.setState({new: {...this.state.new, latitude : lat, longitude : long}})
     
@@ -96,46 +120,44 @@ class Doacao extends Component {
     }
 
     saveSolo = async () => {
-        const { volume, latitude, longitude } = this.state.new;
+        const { volume, cbr, latitude, longitude } = this.state.new;
         let { modalAdd } = this.state;
         const tipoSoloId = this.state.new.tipo_solo.id
-        if(!!latitude && !!longitude){
-            if(volume !== '') {
-                if (tipoSoloId !== 0) {
-                    if (modalAdd.selectedFile !== null) {
-                        await Api.post("solo/", {volume, tipoSoloId, latitude, longitude, statusSoloId : 1}).then(response => {
-                            this.setState({new : {
-                                ...this.state.new,
-                                id: response.data.id
-                            }})
-                            this.setState({modalAdd : {
-                                ...this.state.modalAdd,
-                                soloId: response.data.id
-                            }})
-                            this.setState({doacoes : [this.state.new].concat(this.state.doacoes)})
-                            if (this.state.doacoes.length !== 0 && this.state.hidden) {
-                                this.hiddenTabela()
-                            }else if (this.state.doacoes.length === 0 && this.state.hidden === false){
-                                this.hiddenTabela()
-                            }
+        const raSoloId = this.state.new.ra_solo.id
+        if(volume !== '') {
+            if (tipoSoloId !== 0) {
+                if (raSoloId !== 0) {
+                    await Api.post("solo/", {volume, cbr, tipoSoloId, raSoloId, latitude, longitude, statusSoloId : 1}).then(response => {
+                        this.setState({new : {
+                            ...this.state.new,
+                            id: response.data.id
+                        }})
+                        this.setState({modalAdd : {
+                            ...this.state.modalAdd,
+                            soloId: response.data.id
+                        }})
+                        this.setState({doacoes : [this.state.new].concat(this.state.doacoes)})
+                        if (this.state.doacoes.length !== 0 && this.state.hidden) {
+                            this.hiddenTabela()
+                        }else if (this.state.doacoes.length === 0 && this.state.hidden === false){
+                            this.hiddenTabela()
+                        }
+                        if (modalAdd.selectedFile !== null){
                             this.saveFile();
-                            toast.sucesso("Doação cadastrada com sucesso")
-                            this.toggle();
-                        }).catch( () => {
-                            toast.erro("Erro ao cadastrar a doação")
-                        })
-                    }else {
-                        toast.erro("O PDF do laudo STP é obrigatório!")
-                    }
+                        }
+                        toast.sucesso("Doação cadastrada com sucesso")
+                        this.toggle();
+                    }).catch( () => {
+                        toast.erro("Erro ao cadastrar a doação")
+                    })
                 }else {
-                    toast.erro("Informe o tipo do solo")
+                    toast.erro("Informe a RA do solo")
                 }
             }else {
-                toast.erro("Informe o volume de solo da doação")
+                toast.erro("Informe o tipo do solo")
             }
-        }else{
-            toast.info("Por favor, permita o acesso a sua localização para poder cadastrar novas doações no SDSE.")
-
+        }else {
+            toast.erro("Informe o volume de solo da doação")
         }
     }
 
@@ -222,7 +244,7 @@ class Doacao extends Component {
                         </InputGroup>
                     </Row>
                     </CardBody>
-                    <TabelaDoacoes change={this.setDoacoes.bind(this)} solos={this.state.doacoes} tipos={this.state.tipos} hidden={this.state.hidden}/>
+                    <TabelaDoacoes change={this.setDoacoes.bind(this)} solos={this.state.doacoes} tipos={this.state.tipos} ras={this.state.ras} hidden={this.state.hidden}/>
                 </Card>
                 <Modal isOpen={this.state.showModal} toggle={this.toggle}>
                     <ModalHeader toggle={this.toggle}>Cadastrar doação</ModalHeader>
@@ -233,6 +255,10 @@ class Doacao extends Component {
                                 <Col>
                                     <Label for="volume">Volume (m³)</Label>
                                     <Input value={this.state.new.volume} type='number' id="volume" onChange={this.changeVolumeNew}/>
+                                </Col>
+                                <Col>
+                                    <Label for="cbr">CBR (%)</Label>
+                                    <Input value={this.state.new.cbr} type='number' id="cbr" onChange={this.changeCbrNew}/>
                                 </Col>
                                 <Col>
                                     <ButtonDropdown isOpen={this.state.dropdownOpenNew} toggle={this.toggleTipoNew}  className="pt-4">
@@ -248,6 +274,22 @@ class Doacao extends Component {
                                         </DropdownMenu>
                                     </ButtonDropdown>
                                 </Col>
+                            </Row>
+                            <Row form>
+                                <ButtonDropdown isOpen={this.state.dropdownOpenRA} toggle={this.toggleTipoRA}  className="pt-4">
+                                    <DropdownToggle caret>
+                                        {this.state.new.ra_solo.ra}
+                                    </DropdownToggle>
+                                    <DropdownMenu>
+                                        {this.state.ras.map(ra => {
+                                            return(
+                                                <DropdownItem key={ra.id} disabled={ra.id === 0 ? true : false} onClick={this.changeTipoRA} value={ra.id}>{ra.ra}</DropdownItem>
+                                            )
+                                        })}
+                                    </DropdownMenu>
+                                </ButtonDropdown>
+                            </Row>
+                            <Row form>
                                 <div className="mt-3">
                                     <label>Laudo de caracterização do solo</label>
                                     <input type="file" onChange={(e) => {

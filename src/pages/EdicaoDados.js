@@ -16,7 +16,7 @@ import * as toast from '../utils/toasts'
   class EdicaoDados extends Component {
     render() { 
       const { user } = getUser()
-      const { nome, cnpj, cfdf, email, telefone, representante, cargo_representante, cpf_representante} = user;
+      const { nome, cnpj, cfdf, email, telefone, representante, cargo_representante, cpf_representante, senha, senhaConf} = user;
     return (
     <Container className="mt-5 mb-5 main">
       <h1 align="center" className='mb-5'><Badge>SDSE</Badge></h1>
@@ -24,16 +24,21 @@ import * as toast from '../utils/toasts'
             <CardBody>
               <CardTitle>Dados empresariais</CardTitle>
         <Formik
-              initialValues={{nome, cnpj, cfdf, email, telefone, representante, cargo_representante, cpf_representante }}
+              initialValues={{nome, cnpj, cfdf, email, telefone, representante, cargo_representante, cpf_representante, senha, senhaConf }}
               validationSchema={Yup.object().shape({
                 nome: Yup.string().required('Campo Obrigatório!'),
                 cnpj: Yup.string().required('Campo Obrigatório!'),
-                cfdf: Yup.string().required('Campo Obrigatório!'),
+                cfdf: Yup.string(),
                 email: Yup.string().required('Campo Obrigatório!').email('E-mail inválido!'),
+                senha: Yup.string().required('Campo Obrigatório!'),
+                senhaConf: Yup.string().test('senha-match', 'As senhas não conferem', function(value) {
+                  const {senha} = this.parent;
+                  return senha === value
+                }),
                 telefone: Yup.string().required('Campo Obrigatório!'),
                 representante: Yup.string().required('Campo Obrigatório!'),
-                cargo_representante: Yup.string().required('Campo Obrigatório!'),
-                cpf_representante: Yup.string().required('Campo Obrigatório!'),
+                cargo_representante: Yup.string(),
+                cpf_representante: Yup.string(),
               })}
               onSubmit={async(values, { setSubmitting }) => {          
                 const nome = values.nome;       
@@ -44,8 +49,9 @@ import * as toast from '../utils/toasts'
                 const representante = values.representante;
                 const cargo_representante = values.cargo_representante;
                 const cpf_representante = values.cpf_representante;
+                const senha = values.senha;
           
-                await api.put('empresa', {nome, cnpj, cfdf, email, telefone, representante, cargo_representante, cpf_representante}).then(response => {
+                await api.put('empresa/', {nome, cnpj, cfdf, email, telefone, representante, cargo_representante, cpf_representante, senha}).then(response => {
                   toast.sucesso("Dados atualizados com sucesso!")
                   setUser(response.data)
                   this.props.history.push("/inicio")
@@ -62,6 +68,10 @@ import * as toast from '../utils/toasts'
                   tag={MaskedInput} mask={telefoneMask} component={ReactstrapInput} />
 
                   <Field name="email"  label="Email" type="text" component={ReactstrapInput} />
+
+                  <Field name="senha"  label="Senha" type="password" component={ReactstrapInput} /> 
+
+                  <Field name="senhaConf"  label="Confirmação Senha" type="password" component={ReactstrapInput} /> 
 
                   <Field name="cnpj"  label="CNPJ" type="text" 
                   tag={MaskedInput} mask={cnpjMask} component={ReactstrapInput} />
