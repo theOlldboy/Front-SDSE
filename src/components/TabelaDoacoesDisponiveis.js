@@ -1,13 +1,14 @@
 import React, {Component} from 'react';
-import { ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Table, Button } from 'reactstrap';
+import { ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Table, Button, Row, Label, Col } from 'reactstrap';
 import Paginacao from './Paginacao';
 import Mapa from './Mapa';
 class TabelaSolicitacoes extends Component {
   
   state = {
     currentPage : 0,
-    selected : {volume : '', 
+    selected : {volume : '', cbr : '',
       tipo_solo : {tipo: 'Tipo do solo', id : 0}, 
+      ra_solo : {ra: 'RA do solo', id : 0}, 
       status_solo : {status: 'Status do solo', id : 0},
       empresa_user : {nome : '', telefone : '', cnpj : '', email: '', representante: ''},
       file : {url : ''}
@@ -75,6 +76,14 @@ class TabelaSolicitacoes extends Component {
         <Modal isOpen={this.state.showModal} toggle={this.toggle}>
           <ModalHeader toggle={this.toggle}>Informações sobre a doação</ModalHeader>
           <ModalBody>
+            <Row className='m-2'>
+              <Col>
+                <Label hidden={this.state.selected.cbr == null}>CBR: {this.state.selected.cbr}%</Label>
+              </Col>
+              <Col>
+                <Label>RA: {this.state.selected.ra_solo.ra}</Label>
+              </Col>
+            </Row>
           <ListGroup>
             <ListGroupItem>Empresa: {this.state.selected.empresa_user.nome}</ListGroupItem>
             <ListGroupItem>Telefone: {this.state.selected.empresa_user.telefone}</ListGroupItem>
@@ -82,8 +91,8 @@ class TabelaSolicitacoes extends Component {
             <ListGroupItem>E-mail: {this.state.selected.empresa_user.email}</ListGroupItem>
             <ListGroupItem>Representante: {this.state.selected.empresa_user.representante}</ListGroupItem>
           </ListGroup>
-            <button  className="button-pdf">
-              <a href={this.state.selected.file.url} download="laudoSTP">Baixar laudo de caractarização do solo<i class="fa fa-file-pdf-o"></i></a>
+            <button  className="button-pdf"  hidden={this.state.selected.file == null}>
+              <a href={this.state.selected.file == null ? null : this.state.selected.file.url} download="laudoSTP">Baixar laudo de caractarização do solo<i class="fa fa-file-pdf-o"></i></a>
             </button>
           <div className='mapa'>
             <Mapa place={this.state.selected}/>
