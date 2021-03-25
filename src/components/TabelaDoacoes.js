@@ -9,22 +9,15 @@ class TabelaDoacoes extends Component {
   
   state = {
     currentPage : 0,
-    selected : {volume : '', cbr : '',
-      tipo_solo : {tipo: 'Tipo do solo', id : 0}, 
-      status_solo : {status: 'Status do solo', id : 0},
-      ra_solo : {ra: 'RA do solo', id : 0}
-    },
+    selected : {volume : '', tipo_solo : {tipo: 'Tipo do solo', id : 0}, status_solo : {status: 'Status do solo', id : 0}},
     dropdownOpenTipo : false,
-    dropdownOpenRA : false,
     dropdownOpenStatus : false,
     showModalEdit: false,
     status : [{id : 1, status : 'DOAÇÃO - DISPONÍVEL'},{id : 3, status : 'DOAÇÃO - CONCLUÍDA'}]
   }
 
   componentWillReceiveProps() {
-    this.setState({
-      solos : this.props.solos
-    })
+    this.setState({solos : this.props.solos})
   }
   
    handlePageClick = (e, index) => {
@@ -46,27 +39,14 @@ class TabelaDoacoes extends Component {
 
   toggleTipo = () => this.setState({dropdownOpenTipo : !this.state.dropdownOpenTipo})
 
-  toggleRA = () => this.setState({dropdownOpenRA : !this.state.dropdownOpenRA})
-
   toggleStatus = () => this.setState({dropdownOpenStatus : !this.state.dropdownOpenStatus})
 
   changeVolume = (e) => this.setState({selected: {...this.state.selected, volume : e.target.value}})
-
-  changeCbr = (e) => this.setState({selected: {...this.state.selected, cbr : e.target.value}})
 
   changeTipo = (e) => this.setState({
     selected : {...this.state.selected,
       tipo_solo : {
           tipo : e.target.textContent,
-          id : e.target.value
-        }
-      }  
-    })
-
-  changeRA = (e) => this.setState({
-    selected : {...this.state.selected,
-      ra_solo : {
-          ra : e.target.textContent,
           id : e.target.value
         }
       }  
@@ -82,15 +62,13 @@ class TabelaDoacoes extends Component {
     })
 
   updateSolo = () => {
-    const { id, volume, cbr } = this.state.selected;
+    const { id, volume } = this.state.selected;
     const tipoSoloId = this.state.selected.tipo_solo.id
-    const raSoloId = this.state.selected.ra_solo.id
     const statusSoloId = this.state.selected.status_solo.id
     if (volume !== '') {
       if (tipoSoloId !== 0 ) {
-        if (raSoloId !== 0 ) {
           if (statusSoloId !== 0) {
-              Api.put(`solo/${id}`, {volume, cbr, tipoSoloId, statusSoloId, raSoloId}).then( () => {
+              Api.put(`solo/${id}`, {volume, tipoSoloId, statusSoloId}).then( () => {
                 const solos = this.props.solos.filter(p => this.state.selected.id !== p.id)
                 this.setState({solos : [this.state.selected].concat(solos)})
                 this.props.change([this.state.selected].concat(solos));
@@ -101,11 +79,8 @@ class TabelaDoacoes extends Component {
           }else {
               toast.erro("Informe o status da doação")
           }
-        }else {
-            toast.erro("Informe a RA do solo")
-        }
       }else {
-        toast.erro("Informe o tipo do solo")
+          toast.erro("Informe o tipo do solo")
       }
     }else {
         toast.erro("Informe o volume de solo da doação")
@@ -135,7 +110,7 @@ class TabelaDoacoes extends Component {
                       <td>{solo.tipo_solo.tipo}</td>
                       <td>{solo.status_solo.status}</td>
                       <td>
-                        <Button onClick={() => {this.setState({selected : solo}); this.toggleEdit()}}>Editar</Button></td>
+                        <Button onClick={() => {this.setState({selected : solo}); this.toggleEdit()}}>Editar</Button>                    </td>
                     </tr>
                   </React.Fragment>
                 );
@@ -160,10 +135,6 @@ class TabelaDoacoes extends Component {
                             <Input value={this.state.selected.volume} type='number' id="volume" onChange={this.changeVolume}/>
                         </Col>
                         <Col>
-                            <Label for="cbr">CBR (%)</Label>
-                            <Input value={this.state.selected.cbr} type='number' id="cbr" onChange={this.changeCbr}/>
-                        </Col>
-                        <Col>
                             <ButtonDropdown isOpen={this.state.dropdownOpenTipo} toggle={this.toggleTipo}  className="pt-4">
                                 <DropdownToggle caret>
                                     {this.state.selected.tipo_solo.tipo}
@@ -179,20 +150,6 @@ class TabelaDoacoes extends Component {
                         </Col>
                     </Row>
                       <Row form>
-                        <Col>
-                            <ButtonDropdown isOpen={this.state.dropdownOpenRA} toggle={this.toggleRA}  className="pt-4">
-                                <DropdownToggle caret>
-                                    {this.state.selected.ra_solo.ra}
-                                </DropdownToggle>
-                                <DropdownMenu>
-                                    {this.props.ras.map(ra => {
-                                        return(
-                                            <DropdownItem key={ra.id} disabled={ra.id === 0 ? true : false} onClick={this.changeRA} value={ra.id}>{ra.ra}</DropdownItem>
-                                        )
-                                    })}
-                                </DropdownMenu>
-                            </ButtonDropdown>
-                        </Col>
                         <Col>
                             <ButtonDropdown isOpen={this.state.dropdownOpenStatus} toggle={this.toggleStatus}  className="pt-4">
                                 <DropdownToggle caret>

@@ -1,14 +1,17 @@
 import React, {Component} from 'react';
-import { ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Table, Button, Row, Label, Col } from 'reactstrap';
+import { ListGroup, ListGroupItem, Modal, ModalHeader, ModalBody, ModalFooter, Table, Button, Label, Row, InputGroup, Input, InputGroupAddon } from 'reactstrap';
 import Paginacao from './Paginacao';
 import Mapa from './Mapa';
-class TabelaSolicitacoes extends Component {
+import * as toast from '../utils/toasts'
+import Api from '../services/api'
+
+class TabelaDoacoes extends Component {
   
   state = {
     currentPage : 0,
-    selected : {volume : '', cbr : '',
+    volume: '',
+    selected : {volume : '', 
       tipo_solo : {tipo: 'Tipo do solo', id : 0}, 
-      ra_solo : {ra: 'RA do solo', id : 0}, 
       status_solo : {status: 'Status do solo', id : 0},
       empresa_user : {nome : '', telefone : '', cnpj : '', email: '', representante: ''},
       file : {url : ''}
@@ -16,6 +19,8 @@ class TabelaSolicitacoes extends Component {
     showModal: false,
     places : []
   }
+
+  changeVolume = (e) => this.setState({volume : e.target.value})
 
   componentWillReceiveProps() {
     this.setState({solos : this.props.solos})
@@ -37,6 +42,22 @@ class TabelaSolicitacoes extends Component {
   }
 
   toggle = () => this.setState({showModal: !this.state.showModal})
+
+  interesse = async () => {
+    const { volume } = this.state;
+    const tipoSoloId = this.state.selected.tipo_solo.id;
+    const soloId = this.state.selected.id;
+      if(volume !== '') {
+          await Api.post("solo-interesse/", {volume, tipoSoloId, statusSoloId : 5, soloId}).then(response => {
+              toast.sucesso("Interesse informado com sucesso")
+              this.toggle();
+          }).catch( () => {
+              toast.erro("Erro ao manifestar o interesse")
+          })
+      }else {
+          toast.erro("Informe o volume de solo de interesse")
+      }
+  }
 
   render() {
     return (
@@ -76,14 +97,6 @@ class TabelaSolicitacoes extends Component {
         <Modal isOpen={this.state.showModal} toggle={this.toggle}>
           <ModalHeader toggle={this.toggle}>Informações sobre a doação</ModalHeader>
           <ModalBody>
-            <Row className='m-2'>
-              <Col>
-                <Label hidden={this.state.selected.cbr == null}>CBR: {this.state.selected.cbr}%</Label>
-              </Col>
-              <Col>
-                <Label>RA: {this.state.selected.ra_solo.ra}</Label>
-              </Col>
-            </Row>
           <ListGroup>
             <ListGroupItem>Empresa: {this.state.selected.empresa_user.nome}</ListGroupItem>
             <ListGroupItem>Telefone: {this.state.selected.empresa_user.telefone}</ListGroupItem>
@@ -91,9 +104,14 @@ class TabelaSolicitacoes extends Component {
             <ListGroupItem>E-mail: {this.state.selected.empresa_user.email}</ListGroupItem>
             <ListGroupItem>Representante: {this.state.selected.empresa_user.representante}</ListGroupItem>
           </ListGroup>
-            <button  className="button-pdf"  hidden={this.state.selected.file == null}>
-              <a href={this.state.selected.file == null ? null : this.state.selected.file.url} download="laudoSTP">Baixar laudo de caractarização do solo<i class="fa fa-file-pdf-o"></i></a>
-            </button>
+          <a className="button-pdf" href={this.state.selected.file.url} download="laudoSTP">Baixar laudo de caractarização do solo<i className="fa fa-file-pdf-o"></i></a>
+          <Row className="ml-5 mr-5">
+            <Label>Tem interese?</Label><br/>
+              <InputGroup>
+                  <Input className='rounded-left' placeholder='Volume (m³)' type='number' value={this.state.volume} onChange={this.changeVolume}/>
+                  <InputGroupAddon addonType="append"><Button className='rounded-right' onClick={this.interesse}>Sim!</Button></InputGroupAddon>
+              </InputGroup>
+          </Row>
           <div className='mapa'>
             <Mapa place={this.state.selected}/>
           </div>
@@ -106,4 +124,4 @@ class TabelaSolicitacoes extends Component {
   }
 }
 
-export default TabelaSolicitacoes;
+export default TabelaDoacoes;

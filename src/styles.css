@@ -30,21 +30,21 @@ html, body, #root {
 }
 
 .button-pdf{
-    width: 16em;
+    width: 14em;
     height: 4em;
     color: white;
+    text-align: center;
     background-color: #778899;
     border-radius: .3em ;
     border: none;
-    font-size: 1em;
-    font-family: Montserrat-Bold;
     display:block;
     margin:15px auto;
+    padding: 5px;
   }
 
-  .button-pdf a {
-      color: white;
-      transition: none;
+  .button-pdf:hover{
+    text-decoration: none;
+    color: white;
   }
 
   .fa-file-pdf-o{
@@ -56,23 +56,3 @@ html, body, #root {
     margin-left: -16px;
     margin-top: 20px ;
 }
-
-.dropdown-menu {
-    max-height: 300px;
-    overflow: auto;
-}
-
-.dropdown-menu::-webkit-scrollbar {
-    width: 10px;
-  }
-  .dropdown-menu::-webkit-scrollbar-track {
-    background: #f1f1f1; 
-  }
-   
-  .dropdown-menu::-webkit-scrollbar-thumb {
-    background: #888; 
-  }
-  
-  .dropdown-menu::-webkit-scrollbar-thumb:hover {
-    background: #555; 
-  }

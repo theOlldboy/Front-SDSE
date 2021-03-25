@@ -3,7 +3,7 @@ import "./footer.css";
 
 const Footer = () => (
   <div className="footer">
-    <p>Secretaria de Obras do Distrito Federal <div>CopyRight @ 2021</div></p>
+    <p>Secretaria de Obras do Distrito Federal <div>CopyRigth @ 2020</div></p>
   </div>
 );
 
