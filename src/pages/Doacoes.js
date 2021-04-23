@@ -8,7 +8,7 @@ class Doacao extends Component {
 
     state = {
         doacoes : [],
-        new : {id : 0, volume : '', cbr : '', latitude : '', longitude : '', 
+        new : {id : 0, volume : '', cbr : '', latitude : '', longitude : '', responsaLaudo : false,
             tipo_solo : {tipo: 'Tipo do solo', id : 0}, 
             status_solo : {status : 'DOAÇÃO - DISPONÍVEL', id : 1},
             ra_solo : {ra : 'Selecione a RA', id : 0}
@@ -16,6 +16,7 @@ class Doacao extends Component {
         tipos : [],
         ras : [],
         hidden : false,
+        hiddenResponsa : false,
         volume : '',
         dropdownOpen : false,
         dropdownOpenNew : false,
@@ -49,6 +50,8 @@ class Doacao extends Component {
 
     hiddenTabela = () => this.setState({hidden : !this.state.hidden})
 
+    hiddenResponsa = (value) => this.setState({hiddenResponsa : value})
+
     toggleTipo = () => this.setState({dropdownOpen : !this.state.dropdownOpen})
 
     toggleTipoNew = () => this.setState({dropdownOpenNew : !this.state.dropdownOpenNew})
@@ -77,6 +80,8 @@ class Doacao extends Component {
         }  
     })
     
+    changeResponsa = () => this.setState({new : {...this.state.new, responsaLaudo : !this.state.new.responsaLaudo}})
+
     changeTipoRA = (e) => this.setState({
         new : {...this.state.new,
             ra_solo : {
@@ -96,11 +101,33 @@ class Doacao extends Component {
     
     toggle = () => this.setState({showModal: !this.state.showModal})
 
+    changeFile = (e) => {
+        let modalAdd = this.state.modalAdd;
+        modalAdd.selectedFile = e.target.files[0];
+        this.setState({ modalAdd });
+        if(modalAdd.selectedFile != null) {
+            this.hiddenResponsa(true)
+        }else{
+            this.hiddenResponsa(false)
+        }
+    }
+
     cleanFilters = () => {
         this.setState({
             labelTipo : {tipo : 'Tipo de solo', id : 0},
             volume : '',
         })
+    }
+
+    cleanForm = () => {
+        this.setState({
+            new : {id : 0, volume : '', cbr : '', latitude : '', longitude : '',  responsaLaudo : false,
+                tipo_solo : {tipo: 'Tipo do solo', id : 0}, 
+                status_solo : {status : 'DOAÇÃO - DISPONÍVEL', id : 1},
+                ra_solo : {ra : 'Selecione a RA', id : 0}
+            }
+        })
+        this.hiddenResponsa(false)
     }
 
     buscarDoacao = async () => {
@@ -121,36 +148,45 @@ class Doacao extends Component {
 
     saveSolo = async () => {
         const { volume, cbr, latitude, longitude } = this.state.new;
-        let { modalAdd } = this.state;
+        let { responsaLaudo } = this.state.new;
+        const { modalAdd } = this.state;
         const tipoSoloId = this.state.new.tipo_solo.id
         const raSoloId = this.state.new.ra_solo.id
         if(!!latitude && !!longitude){
             if(volume !== '') {
                 if (tipoSoloId !== 0) {
                     if (raSoloId !== 0) {
-                        await Api.post("solo/", {volume, cbr, tipoSoloId, raSoloId, latitude, longitude, statusSoloId : 1}).then(response => {
-                            this.setState({new : {
-                                ...this.state.new,
-                                id: response.data.id
-                            }})
-                            this.setState({modalAdd : {
-                                ...this.state.modalAdd,
-                                soloId: response.data.id
-                            }})
-                            this.setState({doacoes : [this.state.new].concat(this.state.doacoes)})
-                            if (this.state.doacoes.length !== 0 && this.state.hidden) {
-                                this.hiddenTabela()
-                            }else if (this.state.doacoes.length === 0 && this.state.hidden === false){
-                                this.hiddenTabela()
+                        if (this.state.modalAdd.selectedFile != null || responsaLaudo) {
+                            if (this.state.modalAdd.selectedFile != null && responsaLaudo) {
+                                responsaLaudo = false;
                             }
-                            if (modalAdd.selectedFile !== null){
-                                this.saveFile();
-                            }
-                            toast.sucesso("Doação cadastrada com sucesso")
-                            this.toggle();
-                        }).catch( () => {
-                            toast.erro("Erro ao cadastrar a doação")
-                        })
+                            await Api.post("solo/", {volume, cbr, tipoSoloId, raSoloId, latitude, longitude, statusSoloId : 1, responsaLaudo}).then(response => {
+                                this.setState({new : {
+                                    ...this.state.new,
+                                    id: response.data.id
+                                }})
+                                this.setState({modalAdd : {
+                                    ...this.state.modalAdd,
+                                    soloId: response.data.id
+                                }})
+                                this.setState({doacoes : [this.state.new].concat(this.state.doacoes)})
+                                if (this.state.doacoes.length !== 0 && this.state.hidden) {
+                                    this.hiddenTabela()
+                                }else if (this.state.doacoes.length === 0 && this.state.hidden === false){
+                                    this.hiddenTabela()
+                                }
+                                if (modalAdd.selectedFile !== null){
+                                    this.saveFile();
+                                }
+                                this.cleanForm()
+                                toast.sucesso("Doação cadastrada com sucesso")
+                                this.toggle();
+                            }).catch( () => {
+                                toast.erro("Erro ao cadastrar a doação")
+                            })
+                        }else{
+                            toast.erro("Forneça o laudo de caracterização do solo ou concorde no campo a baixo")
+                        }
                     }else {
                         toast.erro("Informe a RA do solo")
                     }
@@ -298,12 +334,15 @@ class Doacao extends Component {
                             <Row form>
                                 <div className="mt-3">
                                     <label>Laudo de caracterização do solo</label>
-                                    <input type="file" onChange={(e) => {
-                                    let modalAdd = this.state.modalAdd;
-                                    modalAdd.selectedFile = e.target.files[0];
-                                    this.setState({ modalAdd });
-                                    }} name="file" required />
+                                    <input type="file" onChange={this.changeFile} name="file" required />
                                 </div>    
+                            </Row>
+                            <Row form>
+                                <div className="mt-3" hidden={this.state.hiddenResponsa}>
+                                    <label> 
+                                    <Input className='mr-2' addon type="checkbox" onChange={this.changeResponsa} value={this.state.new.responsaLaudo}/>
+                                    Eu concordo e estou ciente da responsabilidade em disponibilizar este solo para doação sem o laudo que o caracteriza.</label>
+                                </div>
                             </Row>
                         </FormGroup>
                         </Form>

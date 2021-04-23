@@ -28,11 +28,6 @@ var routes = [
         component: RedefSenha
     },
     {
-        path: "/interesse_doacao/:doacao/:interesse",
-        name: "InteresseDoacao",
-        component: Interesse
-    },
-    {
         path: "/cadastro_senha/:token",
         name: "PrimeiraSenha",
         component: PrimeiraSenha
@@ -53,6 +48,12 @@ var routes = [
         name: "Doacoes",
         isAuth: true,
         component: Doacoes
+    },
+    {
+        path: "/interesse_doacao/:interesse",
+        name: "InteresseDoacao",
+        isAuth: true,
+        component: Interesse
     },
     {
         path: "/solicitacao",

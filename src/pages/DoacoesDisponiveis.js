@@ -78,7 +78,7 @@ class DoacoesDisponiveis extends Component {
                     <CardBody>
                     <Row className="pb-3">
                         <InputGroup>
-                            <Input className='rounded-left' placeholder='Volume (Kg)' type='number' value={this.state.volume} onChange={this.changeVolume}/>
+                            <Input className='rounded-left' placeholder='Volume (m³)' type='number' value={this.state.volume} onChange={this.changeVolume}/>
                             <InputGroupAddon addonType="append"><Button className='rounded-right' onClick={this.buscarDoacao}>Buscar</Button></InputGroupAddon>
                             <ButtonDropdown className='ml-3' isOpen={this.state.dropdownOpen} toggle={this.toggleTipo}>
                                 <DropdownToggle caret>

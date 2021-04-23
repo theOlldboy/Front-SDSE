@@ -51,6 +51,7 @@ class TabelaDoacoesDisponiveis extends Component {
       if(volume !== '') {
           await Api.post("solo-interesse/", {volume, tipoSoloId, statusSoloId : 5, soloId}).then(response => {
               toast.sucesso("Interesse informado com sucesso")
+              this.setState({volume : ''})
               this.toggle();
           }).catch( () => {
               toast.erro("Erro ao manifestar o interesse")
