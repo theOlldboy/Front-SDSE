@@ -121,7 +121,7 @@ class Doacao extends Component {
 
     cleanForm = () => {
         this.setState({
-            new : {id : 0, volume : '', cbr : '', latitude : '', longitude : '',  responsaLaudo : false,
+            new : {id : 0, volume : '', cbr : '',  responsaLaudo : false,
                 tipo_solo : {tipo: 'Tipo do solo', id : 0}, 
                 status_solo : {status : 'DOAÇÃO - DISPONÍVEL', id : 1},
                 ra_solo : {ra : 'Selecione a RA', id : 0}

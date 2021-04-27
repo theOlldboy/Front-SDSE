@@ -72,6 +72,10 @@ class Solicitacao extends Component {
         })
     }
 
+    cleanForm = () => {
+        this.setState({id: 0, volume : '', tipo_solo : {tipo: 'Tipo do solo', id : 0}, status_solo : {status : 'SOLICITAÇÃO - ABERTA', id : 2}})
+    }
+
     buscarSolicitacao = async () => {
         const {volume} = this.state
         const tipoId = this.state.labelTipo.id
@@ -99,6 +103,7 @@ class Solicitacao extends Component {
                       id: response.data.id
                   }})
                   this.setState({solicitacoes : [this.state.new].concat(this.state.solicitacoes)})
+                  this.cleanForm()
                   if (this.state.solicitacoes.length !== 0 && this.state.hidden) {
                       this.hiddenTabela()
                   }else if (this.state.solicitacoes.length === 0 && this.state.hidden === false){
